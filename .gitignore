@@ -1,0 +1,6 @@
+# Cargo build artifacts
+/target/
+**/.idea
+**/*.rs.bk
+*.swp
+.DS_Store
