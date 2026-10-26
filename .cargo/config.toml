@@ -1,6 +1,5 @@
 [target.'cfg(all(target_arch = "arm", target_os = "none"))']
 runner = "probe-rs run --chip nRF52840_xxAA"
-#runner = "~/Src/tmp/probe-rs/target/release/probe-rs run --chip nRF52840_xxAA"
 [build]
 target = "thumbv7em-none-eabihf"
 

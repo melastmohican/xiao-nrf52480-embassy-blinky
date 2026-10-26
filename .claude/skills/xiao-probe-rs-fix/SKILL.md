@@ -1,4 +1,11 @@
+---
+name: xiao-probe-rs-fix
+description: OBSOLETE since probe-rs 0.32.0 (fixed upstream). Only relevant if stuck on probe-rs <= 0.31.x. Fix probe-rs "Error: Did not expect multiple probes" when flashing or running with the XIAO Debug Mate (ESP32-S3 DAPLink, no USB serial number). Use when `cargo run` or `probe-rs run` fails with that error, or when setting up a patched probe-rs runner in .cargo/config.toml.
+---
+
 # XIAO Debug Mate & probe-rs Multiple Probes Issue
+
+> **No longer required.** Fixed upstream in [PR #3907](https://github.com/probe-rs/probe-rs/pull/3907) (merged 2026-03-23, closes [#3906](https://github.com/probe-rs/probe-rs/issues/3906)) and released in **probe-rs 0.32.0** (2026-07-22). Upgrade (`cargo install probe-rs-tools --locked --force`) and use the stock `probe-rs` runner. The workaround below only applies if you are stuck on 0.31.x or older.
 
 ## The Problem
 When using the **XIAO Debug Mate** (or similar ESP32-S3 based DAPLink debuggers) with `probe-rs`, you may encounter the following error when running `cargo run`:
