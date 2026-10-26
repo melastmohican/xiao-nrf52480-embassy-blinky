@@ -32,4 +32,9 @@ fn main() {
     println!("cargo:rustc-link-arg-bins=--nmagic");
     println!("cargo:rustc-link-arg-bins=-Tlink.x");
     println!("cargo:rustc-link-arg-bins=-Tdefmt.x");
+
+    // The same for the examples, which `rustc-link-arg-bins` does not cover.
+    println!("cargo:rustc-link-arg-examples=--nmagic");
+    println!("cargo:rustc-link-arg-examples=-Tlink.x");
+    println!("cargo:rustc-link-arg-examples=-Tdefmt.x");
 }

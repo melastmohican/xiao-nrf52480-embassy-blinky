@@ -41,6 +41,36 @@ cargo run
 
 The LEDs toggle sequentially every 1000ms using the async `Timer::after_millis()` function provided by Embassy.
 
+### BLE scan (`examples/ble_scan.rs`)
+
+Scans for nearby BLE advertisers and logs each new device once, with what its advertisement says about it. It uses the
+[trouble](https://github.com/embassy-rs/trouble) BLE host on Nordic's SoftDevice Controller (`nrf-sdc` / `nrf-mpsl`),
+modelled on the Pico 2 W `ble_scan` example. The BLE crates are `[dev-dependencies]`, so the blinky does not build them.
+
+```bash
+cargo run --release --example ble_scan
+```
+
+Example output:
+
+```text
+77:0f:c3:63:70:a1 (random, beacon) RSSI -49 dBm, name: -, maker: Apple, service: -
+4b:6b:9b:63:f5:08 (random, scannable) RSSI -84 dBm, name: -, maker: -, service: 0xfe9f
+```
+
+- **Address:** most significant byte first. Phones, watches and earbuds use random addresses that rotate every few
+  minutes, so one device can show up as several.
+- **Type:** `connectable`, `scannable`, `beacon` (non-connectable), `directed` or `scan-response`.
+- **RSSI:** signal strength in dBm; closer to 0 is nearer (about -40 is a few centimetres, -90 is barely audible).
+- **Name:** the local name, if the device broadcasts one. Apple devices usually do not, so `-` is normal. A device is
+  printed again if its name arrives later in a scan response.
+- **Maker:** the manufacturer from the advertisement data, for the common Bluetooth SIG company IDs; `other` otherwise.
+- **Service:** the first 16-bit service UUID (for example `0xfe9f` is a Google service), or `-`.
+
+The scan runs on the single-core critical section the rest of the crate uses, and ran for minutes without MPSL asserts.
+If that ever misbehaves, enable `nrf-mpsl`'s `critical-section-impl` feature and drop `cortex-m`'s
+`critical-section-single-core` for the example.
+
 ### Matter over Thread (`matter-examples/`)
 
 A separate crate with a Matter On/Off light over Thread on the built-in red LED, using
