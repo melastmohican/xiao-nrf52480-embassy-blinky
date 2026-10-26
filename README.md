@@ -41,6 +41,17 @@ cargo run
 
 The LEDs toggle sequentially every 1000ms using the async `Timer::after_millis()` function provided by Embassy.
 
+### Matter over Thread (`matter-examples/`)
+
+A separate crate with a Matter On/Off light over Thread on the built-in red LED, using
+[rs-matter-embassy](https://github.com/sysgrok/rs-matter-embassy). It is separate because it needs a different dependency set
+(`embassy-nrf` 0.11, an allocator, pinned git patches). See [matter-examples/README.md](matter-examples/README.md).
+
+```bash
+cd matter-examples
+cargo run --release --example matter_thread_coex_light
+```
+
 ## Pin Mapping Reference
 
 | Connector / Pin | XIAO nRF52840 | Function |

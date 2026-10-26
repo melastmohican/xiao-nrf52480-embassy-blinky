@@ -1,0 +1,7 @@
+# Merged with ../.cargo/config.toml (runner, target, DEFMT_LOG). This crate has no linker-arg build script entries for the
+# linker scripts, so they are passed here.
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+rustflags = [
+    "-C", "link-arg=-Tlink.x",
+    "-C", "link-arg=-Tdefmt.x",
+]

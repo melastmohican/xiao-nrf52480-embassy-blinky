@@ -1,0 +1,46 @@
+[package]
+name = "matter-examples"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Matter over Thread examples for the Seeed Studio XIAO nRF52840 (rs-matter-embassy)"
+
+# A separate crate, like `softdevice-tests/`, because the Matter stack needs a different dependency set from the plain examples
+# in the repo root (an allocator, and its own critical-section implementation via nrf-mpsl). Build from this directory:
+#   cargo build --release --example matter_thread_coex_light
+
+[dependencies]
+embassy-executor  = { version = "0.10", default-features = false, features = ["platform-cortex-m", "executor-thread", "executor-interrupt", "defmt"] }
+embassy-nrf       = { version = "0.11", features = ["nrf52840", "time-driver-rtc1", "gpiote", "defmt", "time"] }
+cortex-m-rt       = "0.7"
+cortex-m          = { version = "0.7.6" }
+defmt             = "1"
+rs-matter-embassy = { git = "https://github.com/sysgrok/rs-matter-embassy", rev = "603c709b85dab296482dc8702c8fd99568f98b99", default-features = false, features = ["openthread", "defmt", "mbedtls", "openthread-heap-int-8192", "nrf52840", "trouble"] }
+static_cell       = "2"
+tinyrlibc         = { version = "0.5", default-features = false, features = ["alloc", "strstr", "strcmp", "strncmp", "isupper", "memchr", "utoa", "strtoul"] }
+embedded-alloc    = "0.7"
+rtt-target        = { version = "0.6", features = ["defmt"] }
+panic-rtt-target  = "0.2"
+portable-atomic   = { version = "1.5", features = ["critical-section"] }
+
+[profile.release]
+opt-level = "z"
+debug = 2
+debug-assertions = false
+lto = true
+codegen-units = 1
+incremental = false
+overflow-checks = false
+
+[profile.dev]
+debug         = true
+opt-level     = 1    # needed to avoid stack overflows in debug builds with Embassy
+
+# The same revisions `rs-matter-embassy`'s own examples/nrf resolves (examples/nrf/Cargo.toml [patch.crates-io]).
+[patch.crates-io]
+rs-matter = { git = "https://github.com/project-chip/rs-matter", rev = "7195e2b1f45df94ee1bc63605b7db91a6878b9dc" }
+rs-matter-stack = { git = "https://github.com/sysgrok/rs-matter-stack", rev = "3319ed580308bdd8ee84b521ccbd1f5855414602" }
+openthread = { git = "https://github.com/esp-rs/openthread", rev = "705c5576ccfd7b417cfa4b23912a13b1b99e01f2" }
+openthread-sys = { git = "https://github.com/esp-rs/openthread", rev = "705c5576ccfd7b417cfa4b23912a13b1b99e01f2" }
+nrf-802154 = { git = "https://github.com/sysgrok/nrf-802154", rev = "1afdee26c3e860e0eab4ab7f231a8e99b3fae4c8" }
+nrf-802154-sys = { git = "https://github.com/sysgrok/nrf-802154", rev = "1afdee26c3e860e0eab4ab7f231a8e99b3fae4c8" }
