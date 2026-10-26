@@ -143,6 +143,35 @@ The board advertises to one central at a time, so close any phone app that is co
 names, so a board that previously ran other firmware can keep its old name in some tools; the script prints the name
 from the advertisement instead.
 
+### BTHome sensor (`examples/ble_bthome.rs`)
+
+Broadcasts the AHT30 readings as a [BTHome v2](https://bthome.io/) advertisement. Home Assistant discovers it by itself
+(Settings, Devices & services, "Discovered") and creates temperature and humidity sensors, with no pairing. Nothing connects to the
+board: it is a pure broadcaster, so any number of receivers can listen. The data is rebuilt every 10 seconds and
+carries a packet id, so receivers do not discard it as a duplicate.
+
+```bash
+cargo run --release --example ble_bthome
+```
+
+The service data under UUID `0xFCD2` is `40 00 <id> 02 <temp> 03 <hum>`: device info `0x40` (version 2, not
+encrypted), a packet id, temperature (`0x02`, sint16, 0.01 °C) and humidity (`0x03`, uint16, 0.01 %). Objects must be in
+ascending id order. The local name `XIAO-AHT30-XXXX` is in the scan response.
+
+![BTHome device discovered in Home Assistant](docs/bthome-home-assistant.png)
+
+**Testing it without Home Assistant.** On a Mac, the script listens for 30 seconds and decodes what it hears:
+
+```bash
+uv run scripts/bthome_client.py
+```
+
+```text
+XIAO-AHT30-22AF: packet id: 3, temperature: 24.39 C, humidity: 45.08 %
+```
+
+Encryption (BTHome's AES-CCM option) and the other measurement types are not implemented; the spec lists them.
+
 ### Matter over Thread (`matter-examples/`)
 
 A separate crate with a Matter On/Off light over Thread on the built-in red LED, using
