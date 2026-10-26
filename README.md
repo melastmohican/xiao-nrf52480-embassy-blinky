@@ -102,6 +102,26 @@ cargo run --release --example aht30_i2c
 Temperature: 23.19 °C, Humidity: 47.93 %
 ```
 
+### BMP580 sensor (`examples/bmp580_i2c.rs`)
+
+Reads pressure and temperature from an Adafruit BMP580 (I2C address `0x47`) every 2 seconds, using a small async
+register-level driver inside the example. Wire it like this:
+
+| BMP580 | XIAO nRF52840 |
+|--------|---------------|
+| GND    | GND           |
+| VCC    | 3V3           |
+| SDA    | D4 (P0.04)    |
+| SCL    | D5 (P0.05)    |
+
+```bash
+cargo run --release --example bmp580_i2c
+```
+
+```text
+Pressure: 1006.08 hPa, Temperature: 25.43 °C
+```
+
 ### BLE environmental sensor (`examples/ble_peripheral.rs`)
 
 Advertises as `XIAO-AHT30-XXXX` (the last two bytes of the chip's address) and serves the AHT30 readings over the
