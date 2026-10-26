@@ -4,7 +4,7 @@
 //! says about it: address, signal strength (RSSI), advertising type, local name, manufacturer and first service UUID.
 //! Many phones and earbuds use a random address that changes every few minutes, so they can show up as new devices.
 //!
-//! It uses the `trouble` BLE host on top of Nordic's SoftDevice Controller (`nrf-sdc`) and the multiprotocol
+//! It uses the `trouble-host` BLE host on top of Nordic's SoftDevice Controller (`nrf-sdc`) and the multiprotocol
 //! service layer (`nrf-mpsl`) that schedules the radio. This is the same controller stack the Matter examples use.
 //! Nothing from the S140 SoftDevice is enabled: the MBR and the bootloader stay below `0x27000` as before.
 //!
@@ -30,7 +30,7 @@ use heapless::Deque;
 use nrf_mpsl::{MultiprotocolServiceLayer, Peripherals as MpslPeripherals, raw as mpsl_raw};
 use nrf_sdc::{self as sdc, Peripherals as SdcPeripherals, SoftdeviceController};
 use static_cell::StaticCell;
-use trouble::prelude::*;
+use trouble_host::prelude::*;
 use {defmt_rtt as _, panic_probe as _};
 
 bind_interrupts!(struct Irqs {
@@ -95,7 +95,7 @@ async fn main(spawner: Spawner) {
     static RESOURCES: StaticCell<HostResources<DefaultPacketPool, 1, 1>> = StaticCell::new();
     let res = RESOURCES.init(HostResources::new());
 
-    let stack = trouble::new(controller, res).set_random_address(address).build();
+    let stack = trouble_host::new(controller, res).set_random_address(address).build();
     let mut central = stack.central();
     let mut runner = stack.runner();
 

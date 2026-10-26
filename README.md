@@ -71,6 +71,78 @@ The scan runs on the single-core critical section the rest of the crate uses, an
 If that ever misbehaves, enable `nrf-mpsl`'s `critical-section-impl` feature and drop `cortex-m`'s
 `critical-section-single-core` for the example.
 
+### I2C scan (`examples/i2c_scan.rs`)
+
+Probes every 7-bit address on two buses and logs the ones that answer: the external bus on D4/D5, and the onboard IMU
+bus (P0.07/P0.27, with the IMU powered through P1.08). With the AHT30 attached you should see `0x38` on `I2C0`. The
+IMU bus finds `0x6A` only on the Sense board; on the plain XIAO nRF52840 it finds nothing. If SDA is stuck low at
+start, it clocks SCL nine times to free the bus.
+
+```bash
+cargo run --release --example i2c_scan
+```
+
+### AHT30 sensor (`examples/aht30_i2c.rs`)
+
+Reads temperature and humidity from an AHT30 (I2C address `0x38`) every 2 seconds, using the `aht20-driver` crate.
+Wire it like this (a Qwiic/STEMMA QT cable cut open works too):
+
+| AHT30 | XIAO nRF52840 |
+|-------|---------------|
+| GND   | GND           |
+| VCC   | 3V3           |
+| SDA   | D4 (P0.04)    |
+| SCL   | D5 (P0.05)    |
+
+```bash
+cargo run --release --example aht30_i2c
+```
+
+```text
+Temperature: 23.19 °C, Humidity: 47.93 %
+```
+
+### BLE environmental sensor (`examples/ble_peripheral.rs`)
+
+Advertises as `XIAO-AHT30-XXXX` (the last two bytes of the chip's address) and serves the AHT30 readings over the
+standard Environmental Sensing service (`0x181A`), so generic BLE apps show them without a custom UUID table:
+
+| Characteristic | UUID     | Format                   |
+|----------------|----------|--------------------------|
+| Temperature    | `0x2A6E` | sint16, units of 0.01 °C |
+| Humidity       | `0x2A6F` | uint16, units of 0.01 %  |
+
+Both support read and notify. While a central is connected the sensor is sampled every 2 seconds and subscribers get the
+new values. Wire the AHT30 as above, then flash:
+
+```bash
+cargo run --release --example ble_peripheral
+```
+
+The sensor is read with a small async driver inside the example (not `aht20-driver`), because that driver's blocking
+80 ms wait would stall the BLE host on every sample.
+
+**Testing it without a second board.** Either use a phone app (nRF Connect, LightBlue: connect to `XIAO-AHT30-XXXX` and
+enable notifications on the two characteristics), or run the Python client from your Mac. It needs
+[uv](https://docs.astral.sh/uv/) and Bluetooth permission for your terminal (macOS asks on first run):
+
+```bash
+uv run scripts/xiao_env_client.py
+```
+
+It scans for 10 seconds, connects, reads both values and prints notifications for 15 seconds:
+
+```text
+Found XIAO-AHT30-22AF (F60F946E-E4CB-BC8E-2530-3E56D5D2EAB1)
+Read: 24.06 C, 46.66 %
+Notify temperature: 24.06 C
+Notify humidity:    46.63 %
+```
+
+The board advertises to one central at a time, so close any phone app that is connected first. macOS caches device
+names, so a board that previously ran other firmware can keep its old name in some tools; the script prints the name
+from the advertisement instead.
+
 ### Matter over Thread (`matter-examples/`)
 
 A separate crate with a Matter On/Off light over Thread on the built-in red LED, using
@@ -89,6 +161,9 @@ cargo run --release --example matter_thread_coex_light
 | Red LED         | P0_26         | Digital Output (Active Low) |
 | Green LED       | P0_30         | Digital Output (Active Low) |
 | Blue LED        | P0_06         | Digital Output (Active Low) |
+| D4 (SDA)        | P0_04         | External I2C (AHT30)        |
+| D5 (SCL)        | P0_05         | External I2C (AHT30)        |
+| IMU I2C (Sense) | P0_07 / P0_27 | Onboard LSM6DS3, powered by P1_08 |
 
 ## Hardware Links
 
